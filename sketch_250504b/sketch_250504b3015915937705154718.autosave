@@ -6,7 +6,6 @@ int inputX, inputY, inputW, inputH; // dimensoes da text box de input
 int questionCounter = 0;
 String currentQuestion = "";
 Table table;
-TableRow newRow;
 
 void setup() {
 
@@ -16,9 +15,8 @@ void setup() {
   table.addColumn("email");
   table.addColumn("curso");
   table.addColumn("nome");
-
-  newRow = table.addRow();
-  newRow.setInt("id", table.getRowCount());
+  
+  
 
   size(400, 300);
   inputX = 100;
@@ -103,6 +101,7 @@ void processInput(String input) {
   println(currentQuestion + " submitted: " + input);
   questionCounter += 1;
 
+  TableRow newRow = table.addRow();
   newRow.setString(currentQuestion, userInput);
   saveTable(table, "data/new.csv");
   userInput = "";
