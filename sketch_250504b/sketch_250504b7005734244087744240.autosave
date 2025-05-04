@@ -17,8 +17,8 @@ void setup() {
   table.addColumn("curso");
   table.addColumn("nome");
 
-  newRow = table.addRow();
-  newRow.setInt("id", table.getRowCount());
+  1newRow = table.addRow();
+  newRow.setInt("id", table.getRowCount() - 1);
 
   size(400, 300);
   inputX = 100;
