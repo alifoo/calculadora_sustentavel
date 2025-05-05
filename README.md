@@ -5,7 +5,7 @@
 #### Inputs
 - [x] Pegar input do usuário
 - [x] Armazenar input em csv
-- [ ] Criar botão de Exibir resultados após finalizar input
+- [x] Criar botão de Exibir resultados após finalizar input
 
 #### Cálculos e resultados dos inputs
 - [ ] Fazer cálculos com base no input salvo no csv
