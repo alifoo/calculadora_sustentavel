@@ -3,10 +3,12 @@ String userInput = "";
 StringList questionsList;
 boolean typing = false;
 int inputX, inputY, inputW, inputH; // dimensoes da text box de input
+int resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR;
 int questionCounter = 0;
 String currentQuestion = "";
 Table table;
 TableRow newRow;
+int borderTimer = 0;
 
 void setup() {
 
@@ -25,6 +27,12 @@ void setup() {
   inputY = 120;
   inputW = 200;
   inputH = 30;
+
+  resultadosBtnX = 100;
+  resultadosBtnY = 160;
+  resultadosBtnW = 190;
+  resultadosBtnH = 30;
+  resultadosBtnR = 28;
   
   questionsList = new StringList("email", "curso", "nome");
   
@@ -43,9 +51,8 @@ void draw() {
       fill(245);
       stroke(150);
     }
+
     rect(inputX, inputY, inputW, inputH);
-    
-    // exibe o texto input atual
     fill(0);
     text(userInput, inputX + 5, inputY + inputH/2);
     
@@ -67,7 +74,22 @@ void draw() {
       text("Texto atual de input: " + userInput, 60, 180);
     }
   } else {
-    text("Você inseriu todas as informações\nnecessárias para a avaliação.\nPor favor, aguarde um instante.", 105, 105);
+    text("Você inseriu todas as informações\nnecessárias para a avaliação.\n\nClique no botão abaixo para\nver seus resultados.", 105, 105);
+    
+    fill(245);
+    stroke(150);
+    strokeWeight(1);
+    rect(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR);
+    fill(0);
+    text("Exibir resultados", resultadosBtnX + 50, resultadosBtnY + resultadosBtnH/2);
+
+    if (borderTimer > 0) {
+      stroke(35, 76, 125);
+      strokeWeight(3);
+      noFill();
+      rect(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR);
+      borderTimer -= 1;
+    }
   }
 }
 
@@ -77,6 +99,11 @@ void mousePressed() {
     typing = true;
   } else {
     typing = false;
+  }
+
+  if (mouseX > resultadosBtnX && mouseX < resultadosBtnX + resultadosBtnW &&
+      mouseY > resultadosBtnY && mouseY < resultadosBtnY + resultadosBtnH) {
+      borderTimer = 15;
   }
 }
 
@@ -89,8 +116,6 @@ void keyPressed() {
         userInput = userInput.substring(0, userInput.length() - 1);
       }
     } else if (keyCode == ENTER || keyCode == RETURN) {
-      typing = false;
-
       processInput(userInput);
     } else if (keyCode != SHIFT && keyCode != CONTROL && keyCode != ALT && keyCode != KeyEvent.VK_CAPS_LOCK && keyCode != KeyEvent.VK_META) {
       // key = tecla digitada pelo usuario
