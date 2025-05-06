@@ -35,8 +35,8 @@
 ## TO-DO Roadmap (projeto em geral):
 
 #### Dados
-- [ ] Pensar em quais inputs deveremos usar
-- [ ] Criar um documento explicando cada cálculo/ranqueamento usado referente aos inputs do usuário.
+- [ ] Pensar em quais perguntas deveremos usar
+- [ ] Criar um documento explicando cada cálculo/ranqueamento usado referente as perguntas feitas ao usuário.
     Exemplo: Explicar como chegamos no cálculo de que se o usuário andar de carro sozinho, ele tem um gasto de 0.27 de CO2 por km. Esse dado, por exemplo, vem da EMBRAPA.
 - [ ] Criar um cálculo correto para cada input do usuário com base em dados coletados na tarefa anterior
 - [ ] Bases de dados para consultar e nos basear: EMBRAPA, ONU, CETESB, SEEG
