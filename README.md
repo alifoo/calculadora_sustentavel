@@ -13,8 +13,8 @@
 - [ ] Atualizar rank do curso em outro CSV que corresponda ao rank de cursos
 
 #### Resultados
-- [ ] Retornar ao usuário de forma básica na tela os resultados (após ele clicar no botão)
-- [ ] No fim da tela de resultados, exibir novos botões:
+- [x] Retornar ao usuário de forma básica na tela os resultados (após ele clicar no botão)
+- [x] No fim da tela de resultados, exibir novos botões:
         1. Dicas para deixar sua rotina mais sustentável
         2. Exibir rank dos cursos
 
