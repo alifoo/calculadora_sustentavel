@@ -32,6 +32,10 @@
 - [ ] Exportação dos resultados em planilha
 - [ ] Exportação dos resultados em PDF
 
+#### Exibir projeto na web
+- [ ] Verificar como indexar projeto na web através de plugin
+- [ ] Implementar página web simples para exibição (quebrar essa task em mais no futuro, css, html etc)
+
 ## TO-DO Roadmap (projeto em geral):
 
 #### Dados
