@@ -1,4 +1,8 @@
-import java.awt.event.KeyEvent; 
+import java.awt.event.KeyEvent;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 String userInput = "";
 StringList questionsList;
 boolean typing = false;
@@ -9,6 +13,10 @@ String currentQuestion = "";
 Table table;
 TableRow newRow;
 int borderTimer = 0;
+boolean gotResults = false;
+boolean showedResults = false;
+List<Map<String, Object>> analysis_results = new ArrayList<>();
+String state;
 
 void setup() {
 
@@ -42,8 +50,16 @@ void setup() {
 
 void draw() {
   background(240);
-  
+
   if (questionCounter < questionsList.size()) {
+    state = "answeringQuestions";
+  } else {
+    if (state == "answeringQuestions") {
+      state = "waitingResults";
+    }
+  }
+
+  if (state == "answeringQuestions") {
     if (typing) {
       fill(255);
       stroke(0, 0, 255); // borda azul se a box estiver ativa
@@ -73,7 +89,7 @@ void draw() {
     if (userInput.length() > 0) {
       text("Texto atual de input: " + userInput, 60, 180);
     }
-  } else {
+  } else if (state == "waitingResults") {
     text("Você inseriu todas as informações\nnecessárias para a avaliação.\n\nClique no botão abaixo para\nver seus resultados.", 105, 105);
     
     fill(245);
@@ -90,6 +106,10 @@ void draw() {
       rect(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR);
       borderTimer -= 1;
     }
+  } else if (state == "showingResults") {
+    if (showedResults == false) {
+      showResults(analysis_results);
+    }
   }
 }
 
@@ -100,10 +120,16 @@ void mousePressed() {
   } else {
     typing = false;
   }
-
+  
+  // Botão de mostrar resultados
   if (mouseX > resultadosBtnX && mouseX < resultadosBtnX + resultadosBtnW &&
       mouseY > resultadosBtnY && mouseY < resultadosBtnY + resultadosBtnH) {
-      borderTimer = 15;
+    borderTimer = 10;
+    if (gotResults == false) {
+      getResults(analysis_results);
+      gotResults = true;
+    }
+    state = "showingResults";
   }
 }
 
@@ -131,4 +157,28 @@ void processInput(String input) {
   newRow.setString(currentQuestion, userInput);
   saveTable(table, "data/new.csv");
   userInput = "";
+}
+
+void getResults(List<Map<String, Object>> results) {
+  if (gotResults == false) {
+    Map<String, Object> resultQuestion1 = new HashMap<>();
+    resultQuestion1.put("pontos", 20);
+    resultQuestion1.put("pergunta", "transporte semanal");
+
+    Map<String, Object> resultQuestion2 = new HashMap<>();
+    resultQuestion2.put("pontos", 20);
+    resultQuestion2.put("pergunta", "consumo semanal de carne");
+
+    results.add(resultQuestion1);
+    results.add(resultQuestion2);
+  }
+}
+
+void showResults(List<Map<String, Object>> results) {
+  if (results != null) {
+    for (Map<String, Object> result : results) {
+      System.out.println("Você conseguiu " + result.get("pontos") + " devido a seu " + result.get("pergunta"));
+    }
+    showedResults = true;
+  }
 }
