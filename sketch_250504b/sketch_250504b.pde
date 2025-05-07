@@ -295,7 +295,7 @@ String askAI(String prompt) {
 }
 
 void generateTips() {
-  tips = askAI("Hello from Processing!");
+  tips = askAI("Quanto de carbono a queima da gasolina emite?");
   state = "showingTips";
 }
 

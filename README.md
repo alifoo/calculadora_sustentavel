@@ -7,6 +7,11 @@
 - [x] Armazenar input em csv
 - [x] Criar botão de Exibir resultados após finalizar input
 
+#### Aparência do projeto
+- [ ] Definir dimensões ideais
+- [ ] Escolher fonte e identidade visual
+- [ ] Projetar telas minimamente boas
+
 #### Cálculos e resultados dos inputs
 - [ ] Fazer cálculos com base no input salvo no csv
 - [ ] Salvar resultado do usuário no mesmo CSV em campos adicionais
