@@ -13,8 +13,8 @@
 - [ ] Atualizar rank do curso em outro CSV que corresponda ao rank de cursos
 
 #### Resultados
-- [ ] Retornar ao usuário de forma básica na tela os resultados (após ele clicar no botão)
-- [ ] No fim da tela de resultados, exibir novos botões:
+- [x] Retornar ao usuário de forma básica na tela os resultados (após ele clicar no botão)
+- [x] No fim da tela de resultados, exibir novos botões:
         1. Dicas para deixar sua rotina mais sustentável
         2. Exibir rank dos cursos
 
@@ -31,6 +31,10 @@
 - [ ] Exportação dos resultados em PDF
 - [ ] Exportação dos resultados em planilha
 - [ ] Exportação dos resultados em PDF
+
+#### Exibir projeto na web
+- [ ] Verificar como indexar projeto na web através de plugin
+- [ ] Implementar página web simples para exibição (quebrar essa task em mais no futuro, css, html etc)
 
 ## TO-DO Roadmap (projeto em geral):
 

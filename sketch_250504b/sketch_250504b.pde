@@ -8,6 +8,8 @@ StringList questionsList;
 boolean typing = false;
 int inputX, inputY, inputW, inputH; // dimensoes da text box de input
 int resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR;
+int dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR;
+int rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR;
 int questionCounter = 0;
 String currentQuestion = "";
 Table table;
@@ -42,6 +44,18 @@ void setup() {
   resultadosBtnH = 30;
   resultadosBtnR = 28;
   
+  dicasBtnX = 100;
+  dicasBtnY = 210;
+  dicasBtnW = 190;
+  dicasBtnH = 30;
+  dicasBtnR = 28;
+
+  rankBtnX = 100;
+  rankBtnY = 250;
+  rankBtnW = 190;
+  rankBtnH = 30;
+  rankBtnR = 28;
+
   questionsList = new StringList("email", "curso", "nome");
   
   textAlign(LEFT, CENTER);
@@ -99,17 +113,24 @@ void draw() {
     fill(0);
     text("Exibir resultados", resultadosBtnX + 50, resultadosBtnY + resultadosBtnH/2);
 
-    if (borderTimer > 0) {
-      stroke(35, 76, 125);
-      strokeWeight(3);
-      noFill();
-      rect(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR);
-      borderTimer -= 1;
-    }
   } else if (state == "showingResults") {
     if (showedResults == false) {
       showResults(analysis_results);
     }
+
+    fill(245);
+    stroke(150);
+    strokeWeight(1);
+    rect(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR);
+    fill(0);
+    text("Dicas de sustentabilidade", dicasBtnX + 20, dicasBtnY + dicasBtnH/2);
+
+    fill(245);
+    stroke(150);
+    strokeWeight(1);
+    rect(rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR);
+    fill(0);
+    text("Ver o rank dos cursos", rankBtnX + 20, rankBtnY + rankBtnH/2);
   }
 }
 
@@ -123,14 +144,50 @@ void mousePressed() {
   
   // Botão de mostrar resultados
   if (mouseX > resultadosBtnX && mouseX < resultadosBtnX + resultadosBtnW &&
-      mouseY > resultadosBtnY && mouseY < resultadosBtnY + resultadosBtnH) {
-    borderTimer = 10;
+      mouseY > resultadosBtnY && mouseY < resultadosBtnY + resultadosBtnH &&
+      state == "waitingResults") {
+    borderTimer = 5;
+    if (borderTimer > 0) {
+      stroke(35, 76, 125);
+      strokeWeight(3);
+      noFill();
+      rect(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR);
+      borderTimer -= 1;
+    }
+
     if (gotResults == false) {
       getResults(analysis_results);
       gotResults = true;
     }
     state = "showingResults";
   }
+  // Botao de mostrar dicas
+  if (mouseX > dicasBtnX && mouseX < dicasBtnX + dicasBtnW &&
+      mouseY > dicasBtnY && mouseY < dicasBtnY + dicasBtnH &&
+      state == "showingResults") {
+    borderTimer = 5;
+    if (borderTimer > 0) {
+      stroke(35, 76, 125);
+      strokeWeight(3);
+      noFill();
+      rect(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR);
+      borderTimer -= 1;
+    }
+  }
+  // Botao de mostrar ranks
+  if (mouseX > rankBtnX && mouseX < rankBtnX + rankBtnW &&
+      mouseY > rankBtnY && mouseY < rankBtnY + rankBtnH &&
+      state == "showingResults") {
+    borderTimer = 5;
+    if (borderTimer > 0) {
+      stroke(35, 76, 125);
+      strokeWeight(3);
+      noFill();
+      rect(rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR);
+      borderTimer -= 1;
+    }
+  }
+
 }
 
 void keyPressed() {
@@ -176,9 +233,17 @@ void getResults(List<Map<String, Object>> results) {
 
 void showResults(List<Map<String, Object>> results) {
   if (results != null) {
+    StringList showedResults = new StringList();
     for (Map<String, Object> result : results) {
-      System.out.println("Você conseguiu " + result.get("pontos") + " devido a seu " + result.get("pergunta"));
+      String msg = "Você conseguiu " + result.get("pontos") + " pts devido a seu " + result.get("pergunta");
+      showedResults.append(msg);
     }
-    showedResults = true;
+    int y = 60;
+    for (int i = 0; i < showedResults.size(); i++) {
+      fill(50);
+      text(showedResults.get(i), 25, y);
+      y += 20;
+    }
+    //showedResults = true;
   }
 }
