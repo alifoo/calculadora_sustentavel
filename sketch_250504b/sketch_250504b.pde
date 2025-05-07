@@ -1,8 +1,11 @@
 import java.awt.event.KeyEvent;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import http.requests.*;
+JSONObject json;
 String userInput = "";
 StringList questionsList;
 boolean typing = false;
@@ -19,6 +22,10 @@ boolean gotResults = false;
 boolean showedResults = false;
 List<Map<String, Object>> analysis_results = new ArrayList<>();
 String state;
+boolean gotResponse = false;
+String tips;
+int startTime;
+boolean loadingStarted = false;
 
 void setup() {
 
@@ -56,10 +63,15 @@ void setup() {
   rankBtnH = 30;
   rankBtnR = 28;
 
+  int padding = 10;
+  int maxWidth = width - 2 * padding;
+  int maxHeight = height - 2 * padding;
+
   questionsList = new StringList("email", "curso", "nome");
   
   textAlign(LEFT, CENTER);
   textSize(14);
+  startTime = millis();
 }
 
 void draw() {
@@ -131,6 +143,15 @@ void draw() {
     rect(rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR);
     fill(0);
     text("Ver o rank dos cursos", rankBtnX + 20, rankBtnY + rankBtnH/2);
+  } else if (state == "loadingTips") {
+    fill(50);
+    text("Por favor, aguarde. Suas dicas estão sendo geradas.", 105, 105);
+    if (!loadingStarted) {
+      loadingStarted = true;
+      thread("generateTips");
+    }
+  } else if (state == "showingTips") {
+    showTips(tips);
   }
 }
 
@@ -166,6 +187,7 @@ void mousePressed() {
       mouseY > dicasBtnY && mouseY < dicasBtnY + dicasBtnH &&
       state == "showingResults") {
     borderTimer = 5;
+
     if (borderTimer > 0) {
       stroke(35, 76, 125);
       strokeWeight(3);
@@ -173,6 +195,8 @@ void mousePressed() {
       rect(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR);
       borderTimer -= 1;
     }
+    state = "loadingTips";
+    
   }
   // Botao de mostrar ranks
   if (mouseX > rankBtnX && mouseX < rankBtnX + rankBtnW &&
@@ -245,5 +269,39 @@ void showResults(List<Map<String, Object>> results) {
       y += 20;
     }
     //showedResults = true;
+  }
+}
+
+
+String askAI(String prompt) {
+  PostRequest post = new PostRequest("http://localhost:8000/ask");
+  post.addHeader("Content-Type", "application/json");
+
+  String json = "{\"prompt\": \"" + prompt + "\"}";
+  post.addData(json);
+  post.send();
+
+  String content = post.getContent();
+  String reply = "";
+  
+  JSONObject jsonObj = parseJSONObject(content);
+  if (jsonObj != null) {
+    reply = jsonObj.getString("response");
+  }
+  gotResponse = true;
+  state = "showingTips";
+  
+  return reply;
+}
+
+void generateTips() {
+  tips = askAI("Hello from Processing!");
+  state = "showingTips";
+}
+
+void showTips(String tips) {
+  if (tips != null) {
+    fill(50);
+    text(tips, 10, 10, width - 20, height - 20);
   }
 }

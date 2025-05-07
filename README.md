@@ -23,7 +23,8 @@
 - [ ] Exibir ranks em ordem na tela
 
 #### Botões finais
-- [ ] Se o usuário clicar no botão 1, chamar a API do ChatGPT ou script python que a chame para exibir um texto de dica de melhoria de rotina ao usuário com base nos cálculos e inputs
+- [x] Se o usuário clicar no botão 1, chamar um modelo de iA para dar dicas baseadas no input. Implementado localmente com um modelo open-source
+- [ ] Adicionar opção para não usar a IA e conseguir rodar sem o modelo na máquina
 - [ ] Se o usuário clicar no botão 2, exibir rank de cursos
 
 #### Multimídia
@@ -33,8 +34,10 @@
 - [ ] Exportação dos resultados em PDF
 
 #### Exibir projeto na web
-- [ ] Verificar como indexar projeto na web através de plugin
-- [ ] Implementar página web simples para exibição (quebrar essa task em mais no futuro, css, html etc)
+- [x] Verificar como indexar projeto na web através de plugin
+- [x] Implementar página web simples para exibição (quebrar essa task em mais no futuro, css, html etc)
+
+Verificado. A única opção aqui seria exportar o projeto para p5.js posteriormente. Podemos perguntar ao professor se é permitido.
 
 ## TO-DO Roadmap (projeto em geral):
 
