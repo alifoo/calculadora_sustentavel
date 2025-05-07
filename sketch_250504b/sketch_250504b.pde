@@ -176,9 +176,17 @@ void getResults(List<Map<String, Object>> results) {
 
 void showResults(List<Map<String, Object>> results) {
   if (results != null) {
+    StringList showedResults = new StringList();
     for (Map<String, Object> result : results) {
-      System.out.println("Você conseguiu " + result.get("pontos") + " devido a seu " + result.get("pergunta"));
+      String msg = "Você conseguiu " + result.get("pontos") + " devido a seu " + result.get("pergunta");
+      showedResults.append(msg);
     }
-    showedResults = true;
+    int y = 60;
+    for (int i = 0; i < showedResults.size(); i++) {
+      fill(50);
+      text(showedResults.get(i), 25, y);
+      y += 20;
+    }
+    //showedResults = true;
   }
 }
