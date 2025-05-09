@@ -8,7 +8,7 @@
 - [x] Criar botão de Exibir resultados após finalizar input
 
 #### Aparência do projeto
-- [ ] Definir dimensões ideais
+- [x] Definir dimensões ideais
 - [ ] Escolher fonte e identidade visual
 - [ ] Projetar telas minimamente boas
 
