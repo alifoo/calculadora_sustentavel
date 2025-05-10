@@ -55,5 +55,5 @@ Verificado. A única opção aqui seria exportar o projeto para p5.js posteriorm
     O SEEG será usado somente no final, para comparação, exemplo: “Com suas escolhas hoje, você gerou 3.2 kg de CO₂. Isso representa 0.00001% das emissões diárias médias por pessoa no Brasil segundo o SEEG.”
 
 #### Apresentação
-- [ ] Pensar em nome do projeto
+- [x] Pensar em nome do projeto
 - [ ] Criar apresentação do nosso projeto
