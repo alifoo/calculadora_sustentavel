@@ -28,17 +28,6 @@ int startTime;
 boolean loadingStarted = false;
 
 void setup() {
-
-  table = new Table();
-
-  table.addColumn("id");
-  table.addColumn("email");
-  table.addColumn("curso");
-  table.addColumn("nome");
-
-  newRow = table.addRow();
-  newRow.setInt("id", table.getRowCount());
-
   size(400, 300);
   inputX = 100;
   inputY = 120;
@@ -233,10 +222,37 @@ void keyPressed() {
 
 void processInput(String input) {
   println(currentQuestion + " submitted: " + input);
-  questionCounter += 1;
 
-  newRow.setString(currentQuestion, userInput);
+  // verifica se o caminho new.csv existe
+  File f = new File(dataPath("new.csv"));
+  // se o caminho não existir, cria ele
+  if (!f.exists()) {
+  table = new Table();
+
+  table.addColumn("id");
+  table.addColumn("email");
+  table.addColumn("curso");
+  table.addColumn("nome");
+
+  TableRow newRow = table.addRow();
+  table.setInt(table.getRowCount()-1, "id", table.getRowCount());
+  
+  table.setString(table.getRowCount()-1, currentQuestion, input);
   saveTable(table, "data/new.csv");
+} else {
+  // carrega a tabela e cria uma nova linha
+  table = loadTable("data/new.csv", "header");
+  if(questionCounter != 0){
+    TableRow row = table.getRow(table.getRowCount()-1);
+    table.setString(table.getRowCount()-1, currentQuestion, input);
+  } else {
+    TableRow newRow = table.addRow();
+    table.setInt(table.getRowCount()-1, "id", table.getRowCount());
+    table.setString(table.getRowCount()-1, currentQuestion, input);
+  }
+}
+  saveTable(table, "data/new.csv");
+  questionCounter += 1;
   userInput = "";
 }
 
