@@ -84,7 +84,7 @@ void setup() {
 }
 
 void draw() {
-
+  fill(47, 57, 17);
   if (state == "startScreen") {
     background(startBg);
   } else {
@@ -216,7 +216,7 @@ boolean mouseOver(int x, int y, int w, int h) {
 
 void mouseOverStroke(int x, int y, int w, int h, int r) {
   noFill();
-  stroke(35, 76, 125);
+  stroke(135, 193, 255);
   strokeWeight(3);
   rect(x,y,w,h,r);
 }
@@ -283,11 +283,12 @@ void getResults(List<Map<String, Object>> results) {
 void showResults(List<Map<String, Object>> results) {
   if (results != null) {
     StringList showedResults = new StringList();
+    text("Seu resultado foi:", width / 2, 90);
     for (Map<String, Object> result : results) {
-      String msg = "Você conseguiu " + result.get("pontos") + " pts devido a seu " + result.get("pergunta");
+      String msg = "+ " + result.get("pontos") + " pts devido a seu " + result.get("pergunta");
       showedResults.append(msg);
     }
-    int y = 60;
+    int y = 120;
     for (int i = 0; i < showedResults.size(); i++) {
       fill(50);
       text(showedResults.get(i), width / 2, y);
