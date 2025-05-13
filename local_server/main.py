@@ -14,8 +14,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class PromptRequest(BaseModel):
     prompt: str
+
 
 @app.post("/ask")
 async def ask_ai(data: PromptRequest):
@@ -24,7 +26,12 @@ async def ask_ai(data: PromptRequest):
 
     payload = {
         "model": "mistral",
-        "messages": [{"role": "user", "content": prompt if prompt else "Como ser mais sustentável?"}]
+        "messages": [
+            {
+                "role": "user",
+                "content": prompt if prompt else "Como ser mais sustentável?",
+            }
+        ],
     }
 
     response = requests.post(url, json=payload, stream=True)
