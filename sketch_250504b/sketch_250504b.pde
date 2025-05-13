@@ -19,8 +19,9 @@ int dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR;
 int rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR;
 int startBtnX, startBtnY, startBtnW, startBtnH, startBtnR;
 int exitBtnX, exitBtnY, exitBtnW, exitBtnH, exitBtnR;
+int nextBtnX, nextBtnY, nextBtnW, nextBtnH, nextBtnR; // Next button dimensions
 int questionCounter = 0;
-String currentQuestion = "";
+String currentInfo = "";
 Table table;
 TableRow newRow;
 int borderTimer = 0;
@@ -32,6 +33,49 @@ boolean gotResponse = false;
 String tips;
 int startTime;
 boolean loadingStarted = false;
+
+
+String[][] questions = {
+  // Pergunta, Opção 1, Opção 2, Opção 3, Pontuação 1, 2, 3
+  { "Com que frequência você consome carne vermelha?",
+    "Todos os dias", "Algumas vezes por semana", "Raramente ou nunca", "1", "3", "5" },
+
+  { "Você consome produtos orgânicos ou de agricultura familiar?",
+    "Nunca", "Às vezes", "Sempre que possível", "1", "3", "5" },
+
+  { "Como você geralmente vai até a universidade?",
+    "Carro sozinho", "Carona ou app", "Transporte público ou bicicleta/a pé", "1", "2", "5" },
+
+  { "Com que frequência você usa transporte público ou modos ativos?",
+    "Quase nunca", "Algumas vezes/semana", "Quase sempre", "1", "3", "5" },
+
+  { "Você fecha o chuveiro ao se ensaboar?",
+    "Nunca", "Às vezes", "Sempre", "1", "3", "5" },
+
+  { "Quanto tempo dura seu banho?",
+    "Mais de 15 minutos", "10-15 minutos", "Menos de 10 minutos", "1", "3", "5" },
+
+  { "Você desliga luzes e eletrônicos quando não usa?",
+    "Nunca", "Às vezes", "Sempre", "1", "3", "5" },
+
+  { "Você usa lâmpadas LED ou de baixo consumo?",
+    "Não sei / Não uso", "Algumas", "Sim, todas", "1", "3", "5" },
+
+  { "Você separa o lixo reciclável?",
+    "Nunca", "Às vezes", "Sempre", "1", "3", "5" },
+
+  { "Você evita uso de descartáveis?",
+    "Não me preocupo", "Tento evitar às vezes", "Evito sempre", "1", "3", "5" }
+};
+
+int selectedAnswer = -1; // No answer selected initially
+boolean[] answered = new boolean[questions.length]; // Track if each question has been answered
+
+int currentQuestion = 0;
+int[] answers = new int[questions.length];
+int[] points = new int[questions.length];
+boolean done = false;
+
 
 void setup() {
   size(1280, 720);
@@ -77,6 +121,12 @@ void setup() {
   exitBtnY = startBtnY + 60;
   exitBtnR = 28;
 
+  nextBtnW = 150;
+  nextBtnH = 40;
+  nextBtnX = width - 200;
+  nextBtnY = height - 130;
+  nextBtnR = 28;
+
   questionsList = new StringList("email", "curso", "nome");
 
   startTime = millis();
@@ -85,20 +135,17 @@ void setup() {
 
 void draw() {
   fill(47, 57, 17);
-  if (state == "startScreen") {
-    background(startBg);
-  } else {
-    background(bg);
-  }
+  background(bg);
   
-  if (questionCounter >= questionsList.size() && state == "answeringQuestions") {
-    state = "waitingResults";
+  if (questionCounter >= questionsList.size() && state == "answeringInfo") {
+    state = "answeringQuestions";
   }
 
   if (state == "startScreen") {
+    background(startBg);
     drawButton(startBtnX, startBtnY, startBtnW, startBtnH, startBtnR, "Iniciar");
     drawButton(exitBtnX, exitBtnY, exitBtnW, exitBtnH, exitBtnR, "Sair");
-  } else if (state == "answeringQuestions") {
+  } else if (state == "answeringInfo") {
     if (typing) {
       fill(255);
       stroke(0, 0, 255);
@@ -119,14 +166,22 @@ void draw() {
     }
 
     text("Clique na caixa de texto e digite. Pressione ENTER para confirmar.", width / 2, inputY - 60);
-    currentQuestion = questionsList.get(questionCounter);
-    text("Insira o seu " + currentQuestion + ":", width / 2, inputY - 30);
+    currentInfo = questionsList.get(questionCounter);
+    text("Insira o seu " + currentInfo + ":", width / 2, inputY - 30);
 
     if (userInput.length() > 0) {
       text("Texto atual de input: " + userInput, width / 2, inputY + 80);
     }
-
-
+  } else if (state == "answeringQuestions") {
+    if (currentQuestion < questions.length) {
+      showQuestion();
+    } else {
+      if (!done) {
+        //salvarCSV();
+        done = true;
+      }
+      //showResult();
+    }
   } else if (state == "waitingResults") {
     text("Você inseriu todas as informações necessárias para a avaliação.\nClique no botão abaixo para ver seus resultados.", width / 2, inputY - 30);
     drawButton(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR, "Exibir resultados");
@@ -150,6 +205,132 @@ void draw() {
   verifyMouseOver();
 }
 
+void showQuestion() {
+  String[] q = questions[currentQuestion];
+
+  fill(0);
+  textAlign(CENTER, CENTER);
+  text("Questão " + (currentQuestion + 1) + "/" + questions.length, width / 2, 120);
+  
+  textAlign(CENTER, CENTER);
+  text(q[0], width/2, 160);
+
+  for (int i = 0; i < 3; i++) {
+    int y = 260 + i * 80; // espacamento vertical uniforme com base na opcao
+    
+    // highlight da questao selecionada
+    if (selectedAnswer == i) {
+      fill(135, 193, 255, 100);
+      stroke(0, 100, 255);
+      strokeWeight(2);
+    } else {
+      fill(245);
+      stroke(150);
+      strokeWeight(1);
+    }
+    
+    // option box
+    rect(width/2 - 350, y, 700, 60, 10);
+    
+    // option text
+    fill(0);
+    textAlign(LEFT, CENTER);
+    text(q[i + 1], width/2 - 330, y + 30);
+    textAlign(CENTER, CENTER);
+  }
+
+  if (selectedAnswer != -1) {
+    drawButton(nextBtnX, nextBtnY, nextBtnW, nextBtnH, nextBtnR, "Próxima");
+  }
+}
+
+void handleQuestionInteraction() {
+  for (int i = 0; i < 3; i++) {
+    int y = 260 + i * 80;
+    if (mouseX > width/2 - 350 && mouseX < width/2 + 350 && 
+        mouseY > y && mouseY < y + 60) {
+      selectedAnswer = i;
+      
+      answers[currentQuestion] = i;
+      
+      String[] q = questions[currentQuestion];
+      points[currentQuestion] = Integer.parseInt(q[i + 4]);
+      
+      answered[currentQuestion] = true;
+      return;
+    }
+  }
+
+  if (selectedAnswer != -1 && 
+      mouseX > nextBtnX && mouseX < nextBtnX + nextBtnW && 
+      mouseY > nextBtnY && mouseY < nextBtnY + nextBtnH) {
+    
+    if (currentQuestion < questions.length - 1) {
+      currentQuestion++;
+      selectedAnswer = -1; // reseta selecao para a proxima questao
+      
+      // caso a questao ja tenha sido respondida (se implementarmos botao de voltar)
+      if (answered[currentQuestion]) {
+        selectedAnswer = answers[currentQuestion];
+      }
+    } else {
+      saveResults();
+      state = "waitingResults";
+    }
+  }
+}
+
+void saveResults() {
+  int totalScore = 0;
+  for (int i = 0; i < points.length; i++) {
+    totalScore += points[i];
+  }
+  
+  // pega row do user atual (ultima)
+  TableRow row = table.getRow(table.getRowCount() - 1);
+  
+  // add total score se n existir
+  table.checkColumnIndex("total_score");
+  
+  row.setInt("total_score", totalScore);
+  
+  for (int i = 0; i < questions.length; i++) {
+    String questionCol = "question_" + (i + 1);
+    String pointsCol = "points_" + (i + 1);
+    
+    table.checkColumnIndex(questionCol);
+    table.checkColumnIndex(pointsCol);
+    
+    row.setInt(questionCol, answers[i]);
+    row.setInt(pointsCol, points[i]);
+  }
+  
+  saveTable(table, "data/new.csv");
+  
+  updateAnalysisResults();
+}
+
+void updateAnalysisResults() {
+  analysis_results.clear();
+  
+  Map<String, Integer> categoryScores = new HashMap<>();
+  
+  categoryScores.put("Alimentação", points[0] + points[1]);
+  categoryScores.put("Transporte", points[2] + points[3]);
+  categoryScores.put("Água", points[4] + points[5]);
+  categoryScores.put("Energia", points[6] + points[7]);
+  categoryScores.put("Resíduos", points[8] + points[9]);
+  
+  for (Map.Entry<String, Integer> entry : categoryScores.entrySet()) {
+    Map<String, Object> result = new HashMap<>();
+    result.put("pergunta", entry.getKey());
+    result.put("pontos", entry.getValue());
+    analysis_results.add(result);
+  }
+  
+  gotResults = true;
+}
+
 void drawButton(int x, int y, int w, int h, int r, String label) {
   fill(245);
   stroke(150);
@@ -161,11 +342,15 @@ void drawButton(int x, int y, int w, int h, int r, String label) {
 
 void mousePressed() {
   if (mouseOver(startBtnX, startBtnY, startBtnW, startBtnH) && state == "startScreen") {
-    state = "answeringQuestions";
+    state = "answeringInfo";
   }
 
   if (mouseOver(exitBtnX, exitBtnY, exitBtnW, exitBtnH) && state == "startScreen") {
     exit();
+  }
+
+  if (state == "answeringQuestions") {
+    handleQuestionInteraction();
   }
 
   if (mouseX > inputX && mouseX < inputX + inputW && 
@@ -208,6 +393,11 @@ void verifyMouseOver() {
   if (mouseOver(rankBtnX, rankBtnY, rankBtnW, rankBtnH) && state == "showingResults") {
     mouseOverStroke(rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR);
   }
+  if (state == "answeringQuestions" && selectedAnswer != -1) {
+    if (mouseOver(nextBtnX, nextBtnY, nextBtnW, nextBtnH)) {
+      mouseOverStroke(nextBtnX, nextBtnY, nextBtnW, nextBtnH, nextBtnR);
+    }
+  }
 }
 
 boolean mouseOver(int x, int y, int w, int h) {
@@ -234,7 +424,7 @@ void keyPressed() {
 }
 
 void processInput(String input) {
-  println(currentQuestion + " submitted: " + input);
+  println(currentInfo + " submitted: " + input);
   File f = new File(dataPath("new.csv"));
 
   if (!f.exists()) {
@@ -246,17 +436,17 @@ void processInput(String input) {
 
     TableRow newRow = table.addRow();
     table.setInt(table.getRowCount() - 1, "id", table.getRowCount());
-    table.setString(table.getRowCount() - 1, currentQuestion, input);
+    table.setString(table.getRowCount() - 1, currentInfo, input);
     saveTable(table, "data/new.csv");
   } else {
     table = loadTable("data/new.csv", "header");
     if (questionCounter != 0) {
       TableRow row = table.getRow(table.getRowCount() - 1);
-      table.setString(table.getRowCount() - 1, currentQuestion, input);
+      table.setString(table.getRowCount() - 1, currentInfo, input);
     } else {
       TableRow newRow = table.addRow();
       table.setInt(table.getRowCount() - 1, "id", table.getRowCount());
-      table.setString(table.getRowCount() - 1, currentQuestion, input);
+      table.setString(table.getRowCount() - 1, currentInfo, input);
     }
   }
 
