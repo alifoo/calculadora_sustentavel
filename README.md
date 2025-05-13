@@ -1,6 +1,6 @@
 # Projeto de experiência criativa relacionado ao processing.
 
-![Diagrama](https://ibb.co/k616Tw8g)
+![Diagrama](diagram.png)
 
 ## TO-DO Roadmap (código):
 
