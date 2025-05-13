@@ -84,6 +84,7 @@ void setup() {
 }
 
 void draw() {
+
   if (state == "startScreen") {
     background(startBg);
   } else {
@@ -146,6 +147,7 @@ void draw() {
   } else if (state == "showingTips") {
     showTips(tips);
   }
+  verifyMouseOver();
 }
 
 void drawButton(int x, int y, int w, int h, int r, String label) {
@@ -159,8 +161,11 @@ void drawButton(int x, int y, int w, int h, int r, String label) {
 
 void mousePressed() {
   if (mouseOver(startBtnX, startBtnY, startBtnW, startBtnH) && state == "startScreen") {
-    handleButtonClick();
     state = "answeringQuestions";
+  }
+
+  if (mouseOver(exitBtnX, exitBtnY, exitBtnW, exitBtnH) && state == "startScreen") {
+    exit();
   }
 
   if (mouseX > inputX && mouseX < inputX + inputW && 
@@ -171,7 +176,6 @@ void mousePressed() {
   }
 
   if (mouseOver(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH) && state == "waitingResults") {
-    handleButtonClick();
     if (!gotResults) {
       getResults(analysis_results);
       gotResults = true;
@@ -180,12 +184,29 @@ void mousePressed() {
   }
 
   if (mouseOver(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH) && state == "showingResults") {
-    handleButtonClick();
     state = "loadingTips";
   }
 
   if (mouseOver(rankBtnX, rankBtnY, rankBtnW, rankBtnH) && state == "showingResults") {
-    handleButtonClick();
+    exit();
+  }
+}
+
+void verifyMouseOver() {
+  if (mouseOver(startBtnX, startBtnY, startBtnW, startBtnH) && state == "startScreen") {
+      mouseOverStroke(startBtnX, startBtnY, startBtnW, startBtnH, startBtnR);
+  }
+  if (mouseOver(exitBtnX, exitBtnY, exitBtnW, exitBtnH) && state == "startScreen") {
+    mouseOverStroke(exitBtnX, exitBtnY, exitBtnW, exitBtnH, exitBtnR);
+  }
+  if (mouseOver(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH) && state == "waitingResults") {
+    mouseOverStroke(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR);
+  }
+  if (mouseOver(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH) && state == "showingResults") {
+    mouseOverStroke(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR);
+  }
+  if (mouseOver(rankBtnX, rankBtnY, rankBtnW, rankBtnH) && state == "showingResults") {
+    mouseOverStroke(rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR);
   }
 }
 
@@ -193,15 +214,11 @@ boolean mouseOver(int x, int y, int w, int h) {
   return mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
 }
 
-void handleButtonClick() {
-  borderTimer = 5;
-  if (borderTimer > 0) {
-    stroke(35, 76, 125);
-    strokeWeight(3);
-    noFill();
-    rect(mouseX - 150, mouseY - 20, 300, 40, 28);
-    borderTimer -= 1;
-  }
+void mouseOverStroke(int x, int y, int w, int h, int r) {
+  noFill();
+  stroke(35, 76, 125);
+  strokeWeight(3);
+  rect(x,y,w,h,r);
 }
 
 void keyPressed() {
