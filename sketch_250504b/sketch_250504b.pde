@@ -331,6 +331,34 @@ void updateAnalysisResults() {
   gotResults = true;
 }
 
+// funcao para gerar as dicas personalizadas ao estudante
+void generatePersonalizedTips() {
+  TableRow row = table.getRow(table.getRowCount() - 1);
+  String curso = row.getString("curso");
+  String nome = row.getString("nome");
+  
+  StringBuilder promptBuilder = new StringBuilder();
+  
+  promptBuilder.append("PERGUNTAS E RESPOSTAS DO ESTUDANTE:\n\n");
+  
+  for (int i = 0; i < questions.length; i++) {
+    String[] q = questions[i];
+    int answerIndex = answers[i];
+    
+    promptBuilder.append("Pergunta: ").append(q[0]).append("\n");
+    promptBuilder.append("Resposta: ").append(q[answerIndex + 1]).append("\n\n");
+  }
+  
+  promptBuilder.append("Essas foram as respostas de um estudante da PUC-PR localizada em Curitiba-PR, ");
+  promptBuilder.append("Prado Velho, do curso de ").append(curso).append(" chamado ").append(nome).append(".");
+  promptBuilder.append("Além de chamá-lo pelo primeiro nome, se dirija a ele em primeira pessoa, em um tom pessoal e amigável. ");
+  promptBuilder.append("Faça sugestões para que esse estudante torne a sua rotina mais sustentável ");
+  promptBuilder.append("com base em informações sobre a localização mencionada e os hábitos do mesmo. ");
+  promptBuilder.append("Dê no máximo 5 sugestões práticas e objetivas.");
+  
+  tips = askAI(promptBuilder.toString());
+}
+
 void drawButton(int x, int y, int w, int h, int r, String label) {
   fill(245);
   stroke(150);
@@ -375,6 +403,10 @@ void mousePressed() {
   if (mouseOver(rankBtnX, rankBtnY, rankBtnW, rankBtnH) && state == "showingResults") {
     exit();
   }
+
+  if (state == "showingTips" && mouseOver(width/2 - 150, height - 80, 300, 40)) {
+    state = "showingResults";
+  }
 }
 
 void verifyMouseOver() {
@@ -397,6 +429,9 @@ void verifyMouseOver() {
     if (mouseOver(nextBtnX, nextBtnY, nextBtnW, nextBtnH)) {
       mouseOverStroke(nextBtnX, nextBtnY, nextBtnW, nextBtnH, nextBtnR);
     }
+  }
+  if (state == "showingTips" && mouseOver(width/2 - 150, height - 80, 300, 40)) {
+    mouseOverStroke(width/2 - 150, height - 80, 300, 40, 28);
   }
 }
 
@@ -526,7 +561,7 @@ String askAI(String prompt) {
 }
 
 void generateTips() {
-  tips = askAI("Quanto de carbono a queima da gasolina emite?");
+  generatePersonalizedTips();
   state = "showingTips";
 }
 
@@ -534,9 +569,23 @@ void showTips(String tips) {
   if (tips != null) {
     float boxW = width * 0.8;
     float boxX = (width - boxW) / 2;
-    float boxY = height / 2 - 100;
-
-    fill(0); // or another color
-    text(tips, boxX, boxY, boxW, 200); // x, y, w, h
+    float boxY = 100;
+    
+    fill(245);
+    stroke(150);
+    strokeWeight(1);
+    rect(boxX - 20, boxY - 20, boxW + 40, height - 200, 10);
+    
+    fill(0);
+    textAlign(CENTER, TOP);
+    textSize(24);
+    text("Dicas Personalizadas de Sustentabilidade", width/2, boxY);
+    
+    textAlign(LEFT, TOP);
+    textSize(20);
+    text(tips, boxX, boxY + 50, boxW, height - 280);
+    
+    textAlign(CENTER, CENTER);
+    drawButton(width/2 - 150, height - 80, 300, 40, 28, "Voltar aos Resultados");
   }
 }
