@@ -1,5 +1,7 @@
 # Projeto de experiência criativa relacionado ao processing.
 
+![Diagrama](https://drive.google.com/file/d/1UxOdMlA_wu_7udsI4PexC3sznzn8n8-x/view?usp=sharing)
+
 ## TO-DO Roadmap (código):
 
 #### Inputs
@@ -9,8 +11,8 @@
 
 #### Aparência do projeto
 - [x] Definir dimensões ideais
-- [ ] Escolher fonte e identidade visual
-- [ ] Projetar telas minimamente boas
+- [x] Escolher fonte e identidade visual
+- [x] Projetar telas minimamente boas
 
 #### Cálculos e resultados dos inputs
 - [ ] Fazer cálculos com base no input salvo no csv
@@ -29,7 +31,6 @@
 
 #### Botões finais
 - [x] Se o usuário clicar no botão 1, chamar um modelo de iA para dar dicas baseadas no input. Implementado localmente com um modelo open-source
-- [ ] Adicionar opção para não usar a IA e conseguir rodar sem o modelo na máquina
 - [ ] Se o usuário clicar no botão 2, exibir rank de cursos
 
 #### Multimídia
