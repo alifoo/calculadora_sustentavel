@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import http.requests.*;
 PImage bg, startBg;
+PFont myFont;
 
 JSONObject json;
 String userInput = "";
@@ -35,6 +36,8 @@ void setup() {
   size(1280, 720);
   startBg = loadImage("firstscreen.png");
   bg = loadImage("defaultbg.png");
+  myFont = createFont("barkerville-regular.ttf", 32);
+  textFont(myFont);
   textAlign(CENTER, CENTER);
   textSize(20);
 
