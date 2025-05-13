@@ -1,5 +1,6 @@
 import java.awt.event.KeyEvent;
 import java.io.*;
+import java.net.*;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ void setup() {
   size(1280, 720);
   startBg = loadImage("firstscreen.png");
   bg = loadImage("defaultbg.png");
-  myFont = createFont("barkerville-regular.ttf", 32);
+  myFont = createFont("barkerville-regular.ttf", 24);
   textFont(myFont);
   textAlign(CENTER, CENTER);
   textSize(20);
@@ -279,24 +280,41 @@ void showResults(List<Map<String, Object>> results) {
 }
 
 String askAI(String prompt) {
-  PostRequest post = new PostRequest("http://localhost:8000/ask");
-  post.addHeader("Content-Type", "application/json");
+  try {
+    URL url = new URL("http://localhost:8000/ask");
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestMethod("POST");
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    conn.setDoOutput(true);
 
-  String json = "{\"prompt\": \"" + prompt + "\"}";
-  post.addData(json);
-  post.send();
+    JSONObject payload = new JSONObject();
+    payload.setString("prompt", prompt);
 
-  String content = post.getContent();
-  String reply = "";
+    OutputStream os = conn.getOutputStream();
+    byte[] input = payload.toString().getBytes("UTF-8");
+    os.write(input, 0, input.length);
+    os.flush();
+    os.close();
 
-  JSONObject jsonObj = parseJSONObject(content);
-  if (jsonObj != null) {
-    reply = jsonObj.getString("response");
+    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+    StringBuilder response = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+      response.append(line);
+    }
+    reader.close();
+
+    JSONObject jsonObj = parseJSONObject(response.toString());
+    String reply = jsonObj.getString("response");
+
+    gotResponse = true;
+    state = "showingTips";
+
+    return reply;
+  } catch (Exception e) {
+    e.printStackTrace();
+    return "Erro ao comunicar com o servidor.";
   }
-  gotResponse = true;
-  state = "showingTips";
-
-  return reply;
 }
 
 void generateTips() {
@@ -306,6 +324,11 @@ void generateTips() {
 
 void showTips(String tips) {
   if (tips != null) {
-    text(tips, width / 2, height / 2);
+    float boxW = width * 0.8;
+    float boxX = (width - boxW) / 2;
+    float boxY = height / 2 - 100;
+
+    fill(0); // or another color
+    text(tips, boxX, boxY, boxW, 200); // x, y, w, h
   }
 }
