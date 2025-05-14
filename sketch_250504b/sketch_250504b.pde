@@ -10,7 +10,7 @@ import processing.video.*;
 import processing.pdf.*;
 import java.awt.Desktop;
 
-PImage bg, startBg, tipsBg;
+PImage bg, startBg, tipsBg, speakerIcon;
 PFont myFont;
 
 JSONObject json;
@@ -26,6 +26,8 @@ int exitBtnX, exitBtnY, exitBtnW, exitBtnH, exitBtnR;
 int nextBtnX, nextBtnY, nextBtnW, nextBtnH, nextBtnR;
 int pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH, pdfBtnR;
 int openPdfBtnX, openPdfBtnY, openPdfBtnW, openPdfBtnH, openPdfBtnR;
+int ttsBtnX, ttsBtnY, ttsBtnW, ttsBtnH, ttsBtnR;
+boolean isSpeaking = false;
 int questionCounter = 0;
 String currentInfo = "";
 Table table;
@@ -95,6 +97,8 @@ void setup() {
   startBg = loadImage("firstscreen.png");
   tipsBg = loadImage("tipsbg.png");
   bg = loadImage("defaultbg.png");
+  speakerIcon = loadImage("speaker.png");
+  speakerIcon.resize(20, 20);
   myFont = createFont("barkerville-regular.ttf", 24);
   loading = new Movie(this, "carregamento.mp4");
   loading.loop();
@@ -155,6 +159,12 @@ void setup() {
   openPdfBtnX = width/2 - 150;
   openPdfBtnY = height - 230;
   openPdfBtnR = 28;
+
+  ttsBtnW = 30;
+  ttsBtnH = 30;
+  ttsBtnX = width - ttsBtnW - 10;
+  ttsBtnY = 10;
+  ttsBtnR = 10;
 
   questionsList = new StringList("email", "curso", "nome");
 
@@ -462,8 +472,10 @@ void mousePressed() {
 
   if (state == "showingTips") {
     if (mouseOver(width/2 - 150, height - 80, 300, 40)) {
+      exitTipsScreen();
       state = "showingResults";
     } else if (mouseOver(pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH)) {
+      exitTipsScreen();
       exportPDF();
     }
   }
@@ -473,6 +485,17 @@ void mousePressed() {
       state = "showingResults";
     } else if (mouseOver(openPdfBtnX, openPdfBtnY, openPdfBtnW, openPdfBtnH)) {
       openPDF(pdfFilename);
+    }
+  }
+
+  if ((state == "showingTips") && 
+      mouseOver(ttsBtnX, ttsBtnY, ttsBtnW, ttsBtnH)) {
+    if (!isSpeaking) {
+      isSpeaking = true;
+      thread("speakTips"); // speaking em thread separada
+    } else {
+      stopSpeaking();
+      isSpeaking = false;
     }
   }
 }
@@ -498,6 +521,11 @@ void verifyMouseOver() {
     }
     if (mouseOver(pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH)) {
       mouseOverStroke(pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH, pdfBtnR);
+    }
+    drawTTSButton(ttsBtnX, ttsBtnY, ttsBtnW, ttsBtnH, ttsBtnR);
+    
+    if (mouseOver(ttsBtnX, ttsBtnY, ttsBtnW, ttsBtnH)) {
+      mouseOverStroke(ttsBtnX, ttsBtnY, ttsBtnW, ttsBtnH, ttsBtnR);
     }
   }
   if (state == "pdfExported") {
@@ -630,11 +658,11 @@ void showResults(List<Map<String, Object>> results) {
     // barra score
     float barWidth = map(score, 0, maxForCategory, 0, boxWidth - 200);
     if (score < 4) {
-      fill(231, 76, 60); // Red
+      fill(231, 76, 60); // vermelho
     } else if (score < 7) {
-      fill(241, 196, 15); // Yellow
+      fill(241, 196, 15); // amarelo
     } else {
-      fill(46, 204, 113); // Green
+      fill(148, 179, 49); // verde
     }
     noStroke();
     rect(250, startY + i*spacing + 10, barWidth, boxHeight - 20, 3);
@@ -674,41 +702,9 @@ void showResults(List<Map<String, Object>> results) {
 }
 
 String askAI(String prompt) {
-  try {
-    URL url = new URL("http://localhost:8000/ask");
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestMethod("POST");
-    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    conn.setDoOutput(true);
-
-    JSONObject payload = new JSONObject();
-    payload.setString("prompt", prompt);
-
-    OutputStream os = conn.getOutputStream();
-    byte[] input = payload.toString().getBytes("UTF-8");
-    os.write(input, 0, input.length);
-    os.flush();
-    os.close();
-
-    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-    StringBuilder response = new StringBuilder();
-    String line;
-    while ((line = reader.readLine()) != null) {
-      response.append(line);
-    }
-    reader.close();
-
-    JSONObject jsonObj = parseJSONObject(response.toString());
-    String reply = jsonObj.getString("response");
-
-    gotResponse = true;
-    state = "showingTips";
-
-    return reply;
-  } catch (Exception e) {
-    e.printStackTrace();
-    return "Erro ao comunicar com o servidor.";
-  }
+  gotResponse = true;
+  state = "showingTips";
+  return " ";
 }
 
 void generateTips() {
@@ -817,5 +813,92 @@ void openPDF(String filename) {
   } catch (Exception e) {
     println("Error opening PDF: " + e.getMessage());
     e.printStackTrace();
+  }
+}
+
+void drawTTSButton(int x, int y, int w, int h, int r) {
+  fill(245);
+  stroke(150);
+  strokeWeight(1);
+  rect(x, y, w, h, r);
+  
+  imageMode(CENTER);
+  if (isSpeaking) {
+    tint(47, 57, 17); // Dark green tint when active
+  } else {
+    tint(100, 100); // Gray with slight transparency when inactive
+  }
+  image(speakerIcon, x + w/2, y + h/2);
+  noTint(); // Reset tint for other drawings
+
+  if (isSpeaking) {
+    noFill();
+    stroke(47, 57, 17);
+  }
+}
+
+
+// Add these new functions for text-to-speech
+void speakTips() {
+  try {
+    URL url = new URL("http://localhost:8000/speak");
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestMethod("POST");
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    conn.setDoOutput(true);
+
+    // Send the tips text without formatting
+    JSONObject payload = new JSONObject();
+    payload.setString("text", tips);
+
+    OutputStream os = conn.getOutputStream();
+    byte[] input = payload.toString().getBytes("UTF-8");
+    os.write(input, 0, input.length);
+    os.flush();
+    os.close();
+
+    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+    StringBuilder response = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+      response.append(line);
+    }
+    reader.close();
+
+    JSONObject jsonObj = parseJSONObject(response.toString());
+    boolean success = jsonObj.getBoolean("success");
+
+    if (!success) {
+      println("Error with text-to-speech: " + jsonObj.getString("message"));
+      isSpeaking = false;
+    }
+  } catch (Exception e) {
+    e.printStackTrace();
+    println("Error connecting to TTS server");
+    isSpeaking = false;
+  }
+}
+
+void stopSpeaking() {
+  try {
+    URL url = new URL("http://localhost:8000/stop_speaking");
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestMethod("POST");
+    conn.connect();
+    
+    int responseCode = conn.getResponseCode();
+    if (responseCode != 200) {
+      println("Failed to stop speaking, server returned code: " + responseCode);
+    }
+    isSpeaking = false;
+  } catch (Exception e) {
+    e.printStackTrace();
+    println("Error stopping TTS");
+  }
+}
+
+void exitTipsScreen() {
+  if (isSpeaking) {
+    stopSpeaking();
   }
 }
