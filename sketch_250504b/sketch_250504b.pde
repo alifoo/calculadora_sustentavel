@@ -8,6 +8,7 @@ import java.util.HashMap;
 import http.requests.*;
 import processing.video.*;
 import processing.pdf.*;
+import java.awt.Desktop;
 
 PImage bg, startBg, tipsBg;
 PFont myFont;
@@ -24,6 +25,7 @@ int startBtnX, startBtnY, startBtnW, startBtnH, startBtnR;
 int exitBtnX, exitBtnY, exitBtnW, exitBtnH, exitBtnR;
 int nextBtnX, nextBtnY, nextBtnW, nextBtnH, nextBtnR;
 int pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH, pdfBtnR;
+int openPdfBtnX, openPdfBtnY, openPdfBtnW, openPdfBtnH, openPdfBtnR;
 int questionCounter = 0;
 String currentInfo = "";
 Table table;
@@ -99,7 +101,7 @@ void setup() {
 
   textFont(myFont);
   textAlign(CENTER, CENTER);
-  textSize(20);
+  textSize(18);
 
   inputW = 300;
   inputH = 40;
@@ -147,6 +149,12 @@ void setup() {
   pdfBtnX = width/2 - 150;
   pdfBtnY = height - 130;
   pdfBtnR = 28;
+
+  openPdfBtnW = 300;
+  openPdfBtnH = 40;
+  openPdfBtnX = width/2 - 150;
+  openPdfBtnY = height - 230;
+  openPdfBtnR = 28;
 
   questionsList = new StringList("email", "curso", "nome");
 
@@ -237,7 +245,9 @@ void draw() {
       }
     }
   } else if (state == "showingTips") {
-      showTips(tips);
+    showTips(tips);
+  } else if (state == "pdfExported") {
+    showTips(tips);
   }
 
   verifyMouseOver();
@@ -465,6 +475,14 @@ void mousePressed() {
       exportPDF();
     }
   }
+  
+  if (state == "pdfExported") {
+    if (mouseOver(width/2 - 150, openPdfBtnY + 60, 300, 40)) {
+      state = "showingResults";
+    } else if (mouseOver(openPdfBtnX, openPdfBtnY, openPdfBtnW, openPdfBtnH)) {
+      openPDF(pdfFilename);
+    }
+  }
 }
 
 void verifyMouseOver() {
@@ -496,6 +514,14 @@ void verifyMouseOver() {
       mouseOverStroke(pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH, pdfBtnR);
     }
   }
+  if (state == "pdfExported") {
+    if (mouseOver(width/2 - 150, openPdfBtnY + 60, 300, 40)) {
+      mouseOverStroke(width/2 - 150, openPdfBtnY + 60, 300, 40, 28);
+    }
+    if (mouseOver(openPdfBtnX, openPdfBtnY, openPdfBtnW, openPdfBtnH)) {
+      mouseOverStroke(openPdfBtnX, openPdfBtnY, openPdfBtnW, openPdfBtnH, openPdfBtnR);
+    }
+  }
 }
 
 boolean mouseOver(int x, int y, int w, int h) {
@@ -503,17 +529,14 @@ boolean mouseOver(int x, int y, int w, int h) {
 }
 
 void mouseOverStroke(int x, int y, int w, int h, int r) {
-  // Save current stroke settings
   float savedWeight = g.strokeWeight;
   int savedColor = g.strokeColor;
   
-  // Apply hover effect
   noFill();
   stroke(135, 193, 255);
   strokeWeight(3);
   rect(x, y, w, h, r);
   
-  // Restore previous stroke settings
   stroke(savedColor);
   strokeWeight(savedWeight);
 }
@@ -643,7 +666,7 @@ void generateTips() {
 }
 
 void showTips(String tips) {
-  if (tips != null) {
+  if ((tips != null) && (state == "showingTips")) {
     background(tipsBg);
     float boxW = width * 0.95;
     float boxX = (width - boxW) / 2;
@@ -687,14 +710,20 @@ void showTips(String tips) {
       endRecord();
       exportingPDF = false;
       println("PDF saved to: data/" + pdfFilename);
+      state = "pdfExported";
     } else {
       textAlign(CENTER, CENTER);
-      
+      textSize(18);
       drawButton(pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH, pdfBtnR, "Exportar para PDF");
-      
       drawButton(width/2 - 150, height - 80, 300, 40, 28, "Voltar aos Resultados");
     }
-  }
+  } else if ((tips != null) && (state == "pdfExported")) {
+      textAlign(CENTER, CENTER);
+      textSize(18);
+      text("PDF gerado e salvo. Clique no botão abaixo para voltar.", width / 2, height / 2);
+      drawButton(openPdfBtnX, openPdfBtnY, openPdfBtnW, openPdfBtnH, openPdfBtnR, "Abrir PDF");
+      drawButton(width/2 - 150, openPdfBtnY + 60, 300, 40, 28, "Voltar aos Resultados");
+    }
 }
 
 String generatePDFFilename() {
@@ -718,4 +747,22 @@ void exportPDF() {
 void movieEvent(Movie m) {
   m.read();
   loadingMovieReady = true;
+}
+
+void openPDF(String filename) {
+  try {
+    File pdfFile = new File(dataPath(filename));
+    if (pdfFile.exists()) {
+      if (Desktop.isDesktopSupported()) {
+        Desktop.getDesktop().open(pdfFile);
+      } else {
+        println("Desktop class not supported - can't open PDF automatically");
+      }
+    } else {
+      println("PDF file not found: " + pdfFile.getAbsolutePath());
+    }
+  } catch (Exception e) {
+    println("Error opening PDF: " + e.getMessage());
+    e.printStackTrace();
+  }
 }
