@@ -9,7 +9,7 @@ import http.requests.*;
 import processing.video.*;
 import processing.pdf.*;
 
-PImage bg, startBg;
+PImage bg, startBg, tipsBg;
 PFont myFont;
 
 JSONObject json;
@@ -42,6 +42,9 @@ String pdfFilename = "";
 Movie loading;
 boolean tipsGenerated = false;
 boolean loadingMovieReady = false;
+int lastClickTime = 0;
+int doubleClickSpeed = 300;
+int lastClickedOption = -1;
 
 String[][] questions = {
   // Pergunta, Opção 1, Opção 2, Opção 3, Pontuação 1, 2, 3
@@ -88,6 +91,7 @@ boolean done = false;
 void setup() {
   size(1280, 720);
   startBg = loadImage("firstscreen.png");
+  tipsBg = loadImage("tipsbg.png");
   bg = loadImage("defaultbg.png");
   myFont = createFont("barkerville-regular.ttf", 24);
   loading = new Movie(this, "carregamento.mp4");
@@ -279,18 +283,26 @@ void showQuestion() {
 }
 
 void handleQuestionInteraction() {
+  int currentTime = millis();
   for (int i = 0; i < 3; i++) {
     int y = 260 + i * 80;
     if (mouseX > width/2 - 350 && mouseX < width/2 + 350 && 
         mouseY > y && mouseY < y + 60) {
+      boolean isDoubleClick = (i == lastClickedOption) && (currentTime - lastClickTime < doubleClickSpeed);
+
       selectedAnswer = i;
-      
       answers[currentQuestion] = i;
       
       String[] q = questions[currentQuestion];
       points[currentQuestion] = Integer.parseInt(q[i + 4]);
-      
       answered[currentQuestion] = true;
+
+      if (isDoubleClick) {
+        advanceToNextQuestion();
+      }
+
+      lastClickedOption = i;
+      lastClickTime = currentTime;
       return;
     }
   }
@@ -298,11 +310,16 @@ void handleQuestionInteraction() {
   if (selectedAnswer != -1 && 
       mouseX > nextBtnX && mouseX < nextBtnX + nextBtnW && 
       mouseY > nextBtnY && mouseY < nextBtnY + nextBtnH) {
-    
-    if (currentQuestion < questions.length - 1) {
+    advanceToNextQuestion();
+   }
+}
+
+
+void advanceToNextQuestion() {
+  if (currentQuestion < questions.length - 1) {
       currentQuestion++;
       selectedAnswer = -1; // reseta selecao para a proxima questao
-      
+
       // caso a questao ja tenha sido respondida (se implementarmos botao de voltar)
       if (answered[currentQuestion]) {
         selectedAnswer = answers[currentQuestion];
@@ -311,8 +328,8 @@ void handleQuestionInteraction() {
       saveResults();
       state = "waitingResults";
     }
-  }
 }
+
 
 void saveResults() {
   int totalScore = 0;
@@ -486,10 +503,19 @@ boolean mouseOver(int x, int y, int w, int h) {
 }
 
 void mouseOverStroke(int x, int y, int w, int h, int r) {
+  // Save current stroke settings
+  float savedWeight = g.strokeWeight;
+  int savedColor = g.strokeColor;
+  
+  // Apply hover effect
   noFill();
   stroke(135, 193, 255);
   strokeWeight(3);
-  rect(x,y,w,h,r);
+  rect(x, y, w, h, r);
+  
+  // Restore previous stroke settings
+  stroke(savedColor);
+  strokeWeight(savedWeight);
 }
 
 void keyPressed() {
@@ -500,6 +526,10 @@ void keyPressed() {
       processInput(userInput);
     } else if (keyCode != SHIFT && keyCode != CONTROL && keyCode != ALT && keyCode != KeyEvent.VK_CAPS_LOCK && keyCode != KeyEvent.VK_META) {
       userInput += key;
+    } else if ((state == "answeringQuestions") && (keyCode == ENTER || keyCode == RETURN)) {
+      if (selectedAnswer != -1) {
+        advanceToNextQuestion();
+      }
     }
   }
 }
@@ -609,10 +639,12 @@ String askAI(String prompt) {
 void generateTips() {
   generatePersonalizedTips();
   state = "showingTips";
+  tipsGenerated = true;
 }
 
 void showTips(String tips) {
   if (tips != null) {
+    background(tipsBg);
     float boxW = width * 0.95;
     float boxX = (width - boxW) / 2;
     float boxY = 80;
