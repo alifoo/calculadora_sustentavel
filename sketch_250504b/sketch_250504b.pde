@@ -117,7 +117,7 @@ void setup() {
   dicasBtnW = 300;
   dicasBtnH = 40;
   dicasBtnX = (width - dicasBtnW) / 2;
-  dicasBtnY = resultadosBtnY + 60;
+  dicasBtnY = resultadosBtnY + 150;
   dicasBtnR = 28;
 
   rankBtnW = 300;
@@ -129,7 +129,7 @@ void setup() {
   startBtnW = 300;
   startBtnH = 40;
   startBtnX = (width - startBtnW) / 2;
-  startBtnY = rankBtnY + 20;
+  startBtnY = resultadosBtnY + 140;
   startBtnR = 28;
 
   exitBtnW = 300;
@@ -216,12 +216,8 @@ void draw() {
     drawButton(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR, "Exibir resultados");
 
   } else if (state == "showingResults") {
-    if (!showedResults) {
-      showResults(analysis_results);
-    }
-    drawButton(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR, "Dicas de sustentabilidade");
-    drawButton(rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR, "Ver o rank dos cursos");
-
+    showResults(analysis_results);
+    return;
   } else if (state == "loadingTips") {
     if (tipsGenerated == true) {
       state = "showingTips";
@@ -453,10 +449,6 @@ void mousePressed() {
   }
 
   if (mouseOver(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH) && state == "waitingResults") {
-    if (!gotResults) {
-      getResults(analysis_results);
-      gotResults = true;
-    }
     state = "showingResults";
   }
 
@@ -494,12 +486,6 @@ void verifyMouseOver() {
   }
   if (mouseOver(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH) && state == "waitingResults") {
     mouseOverStroke(resultadosBtnX, resultadosBtnY, resultadosBtnW, resultadosBtnH, resultadosBtnR);
-  }
-  if (mouseOver(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH) && state == "showingResults") {
-    mouseOverStroke(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR);
-  }
-  if (mouseOver(rankBtnX, rankBtnY, rankBtnW, rankBtnH) && state == "showingResults") {
-    mouseOverStroke(rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR);
   }
   if (state == "answeringQuestions" && selectedAnswer != -1) {
     if (mouseOver(nextBtnX, nextBtnY, nextBtnW, nextBtnH)) {
@@ -605,19 +591,85 @@ void getResults(List<Map<String, Object>> results) {
 }
 
 void showResults(List<Map<String, Object>> results) {
-  if (results != null) {
-    StringList showedResults = new StringList();
-    text("Seu resultado foi:", width / 2, 90);
-    for (Map<String, Object> result : results) {
-      String msg = "+ " + result.get("pontos") + " pts devido a seu " + result.get("pergunta");
-      showedResults.append(msg);
+  fill(255);
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text("SEU RESULTADO", width/2, 50);
+  
+  int totalScore = 0;
+  for (Map<String, Object> result : results) {
+    totalScore += (Integer)result.get("pontos");
+  }
+  int maxPossibleScore = questions.length * 5;
+  
+  fill(47, 57, 17);
+  textSize(20);
+  text("Pontuação Total: " + totalScore + "/" + maxPossibleScore, width/2, 120);
+  
+
+  int startY = 200;
+  int boxWidth = width - 100;
+  int boxHeight = 40;
+  int spacing = 60;
+  
+  for (int i = 0; i < results.size(); i++) {
+    Map<String, Object> result = results.get(i);
+    String category = (String)result.get("pergunta");
+    int score = (Integer)result.get("pontos");
+    int maxForCategory = 10;
+    
+    fill(255);
+    stroke(200);
+    rect(50, startY + i*spacing, boxWidth, boxHeight, 5);
+    
+    // nome da categoria
+    fill(47, 57, 17);
+    textAlign(LEFT, CENTER);
+    text(category, 70, startY + i*spacing + boxHeight/2);
+    
+    // barra score
+    float barWidth = map(score, 0, maxForCategory, 0, boxWidth - 200);
+    if (score < 4) {
+      fill(231, 76, 60); // Red
+    } else if (score < 7) {
+      fill(241, 196, 15); // Yellow
+    } else {
+      fill(46, 204, 113); // Green
     }
-    int y = 120;
-    for (int i = 0; i < showedResults.size(); i++) {
-      fill(50);
-      text(showedResults.get(i), width / 2, y);
-      y += 30;
-    }
+    noStroke();
+    rect(250, startY + i*spacing + 10, barWidth, boxHeight - 20, 3);
+    
+    // texto score
+    fill(47, 57, 17);
+    textAlign(RIGHT, CENTER);
+    text(score + "/" + maxForCategory, width - 70, startY + i*spacing + boxHeight/2);
+  }
+  
+  // feedback
+  float percentage = (float)totalScore / maxPossibleScore * 100;
+  String feedback;
+  
+  if (percentage < 40) {
+    feedback = "Você está começando sua jornada sustentável. Há muitas oportunidades para melhorar!";
+  } else if (percentage < 70) {
+    feedback = "Você está no caminho certo! Continue trabalhando para melhorar seus hábitos.";
+  } else {
+    feedback = "Parabéns! Você tem hábitos muito sustentáveis. Continue sendo um exemplo!";
+  }
+  
+  fill(47, 57, 17);
+  textAlign(CENTER, CENTER);
+  textSize(16);
+  text(feedback, width/2, 150);
+  
+  drawButton(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR, "Dicas de sustentabilidade");
+  drawButton(rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR, "Ver o rank dos cursos");
+
+  if (mouseOver(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH) && state == "showingResults") {
+    mouseOverStroke(dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR);
+  }
+  if (mouseOver(rankBtnX, rankBtnY, rankBtnW, rankBtnH) && state == "showingResults") {
+    mouseOverStroke(rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR);
   }
 }
 
@@ -713,14 +765,15 @@ void showTips(String tips) {
       state = "pdfExported";
     } else {
       textAlign(CENTER, CENTER);
-      textSize(18);
+      textSize(14);
       drawButton(pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH, pdfBtnR, "Exportar para PDF");
       drawButton(width/2 - 150, height - 80, 300, 40, 28, "Voltar aos Resultados");
     }
   } else if ((tips != null) && (state == "pdfExported")) {
       textAlign(CENTER, CENTER);
       textSize(18);
-      text("PDF gerado e salvo. Clique no botão abaixo para voltar.", width / 2, height / 2);
+      text("PDF gerado e salvo!", width / 2, height / 2);
+      textSize(14);
       drawButton(openPdfBtnX, openPdfBtnY, openPdfBtnW, openPdfBtnH, openPdfBtnR, "Abrir PDF");
       drawButton(width/2 - 150, openPdfBtnY + 60, 300, 40, 28, "Voltar aos Resultados");
     }
