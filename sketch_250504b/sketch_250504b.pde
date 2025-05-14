@@ -702,9 +702,41 @@ void showResults(List<Map<String, Object>> results) {
 }
 
 String askAI(String prompt) {
-  gotResponse = true;
-  state = "showingTips";
-  return " ";
+  try {
+    URL url = new URL("http://localhost:8000/ask");
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestMethod("POST");
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    conn.setDoOutput(true);
+
+    JSONObject payload = new JSONObject();
+    payload.setString("prompt", prompt);
+
+    OutputStream os = conn.getOutputStream();
+    byte[] input = payload.toString().getBytes("UTF-8");
+    os.write(input, 0, input.length);
+    os.flush();
+    os.close();
+
+    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+    StringBuilder response = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+      response.append(line);
+    }
+    reader.close();
+
+    JSONObject jsonObj = parseJSONObject(response.toString());
+    String reply = jsonObj.getString("response");
+
+    gotResponse = true;
+    state = "showingTips";
+
+    return reply;
+  } catch (Exception e) {
+    e.printStackTrace();
+    return "Erro ao comunicar com o servidor.";
+  }
 }
 
 void generateTips() {
