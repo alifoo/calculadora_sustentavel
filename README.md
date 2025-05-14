@@ -1,6 +1,15 @@
-# Calculadora Sustentável
+# 🌱 Calculadora Sustentável
 
-Calculadora sustentável é um programa que mede o nível de sustentabilidade de cada curso universitário com base em critérios ambientais, sociais e econômicos. A aplicação gera relatórios personalizados, oferece sugestões de boas práticas e conecta professores, alunos e gestores em torno de ações sustentáveis.
+Calculadora sustentável é uma ferramenta interativa que calcula o impacto ambiental de estudantes universitários, através de:
+
+📊 Questionário com 14 perguntas sobre hábitos diários
+🌍 Cálculo automático da pegada de carbono
+💡 Dicas personalizadas por IA para redução de impacto
+📥 Exportação de resultados em PDF/planilha
+🎤 Acessibilidade através de voz via IA
+
+Tecnologias utilizadas: Processing, Java, IA generativa
+Principais bibliotecas: FastAPI, Pydantic e bibliotecas internas do Processing 4.
 
 ## Tela inicial
 ![Tela inicial](inicial.png)
