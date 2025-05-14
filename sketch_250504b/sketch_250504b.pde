@@ -201,6 +201,8 @@ void draw() {
     }
   } else if (state == "showingTips") {
     showTips(tips);
+  } else if (state == "showingLeaderboard") {
+
   }
   verifyMouseOver();
 }
@@ -401,7 +403,7 @@ void mousePressed() {
   }
 
   if (mouseOver(rankBtnX, rankBtnY, rankBtnW, rankBtnH) && state == "showingResults") {
-    exit();
+    state = "showingLeaderboard";
   }
 
   if (state == "showingTips" && mouseOver(width/2 - 150, height - 80, 300, 40)) {
