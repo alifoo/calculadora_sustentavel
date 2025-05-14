@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 import http.requests.*;
+import processing.video.*;
+import processing.pdf.*;
+
 PImage bg, startBg;
 PFont myFont;
 
@@ -19,7 +22,8 @@ int dicasBtnX, dicasBtnY, dicasBtnW, dicasBtnH, dicasBtnR;
 int rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR;
 int startBtnX, startBtnY, startBtnW, startBtnH, startBtnR;
 int exitBtnX, exitBtnY, exitBtnW, exitBtnH, exitBtnR;
-int nextBtnX, nextBtnY, nextBtnW, nextBtnH, nextBtnR; // Next button dimensions
+int nextBtnX, nextBtnY, nextBtnW, nextBtnH, nextBtnR;
+int pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH, pdfBtnR;
 int questionCounter = 0;
 String currentInfo = "";
 Table table;
@@ -33,7 +37,11 @@ boolean gotResponse = false;
 String tips;
 int startTime;
 boolean loadingStarted = false;
-
+boolean exportingPDF = false;
+String pdfFilename = "";
+Movie loading;
+boolean tipsGenerated = false;
+boolean loadingMovieReady = false;
 
 String[][] questions = {
   // Pergunta, Opção 1, Opção 2, Opção 3, Pontuação 1, 2, 3
@@ -68,8 +76,8 @@ String[][] questions = {
     "Não me preocupo", "Tento evitar às vezes", "Evito sempre", "1", "3", "5" }
 };
 
-int selectedAnswer = -1; // No answer selected initially
-boolean[] answered = new boolean[questions.length]; // Track if each question has been answered
+int selectedAnswer = -1;
+boolean[] answered = new boolean[questions.length];
 
 int currentQuestion = 0;
 int[] answers = new int[questions.length];
@@ -82,6 +90,9 @@ void setup() {
   startBg = loadImage("firstscreen.png");
   bg = loadImage("defaultbg.png");
   myFont = createFont("barkerville-regular.ttf", 24);
+  loading = new Movie(this, "carregamento.mp4");
+  loading.loop();
+
   textFont(myFont);
   textAlign(CENTER, CENTER);
   textSize(20);
@@ -126,6 +137,12 @@ void setup() {
   nextBtnX = width - 200;
   nextBtnY = height - 130;
   nextBtnR = 28;
+
+  pdfBtnW = 300;
+  pdfBtnH = 40;
+  pdfBtnX = width/2 - 150;
+  pdfBtnY = height - 130;
+  pdfBtnR = 28;
 
   questionsList = new StringList("email", "curso", "nome");
 
@@ -194,14 +211,31 @@ void draw() {
     drawButton(rankBtnX, rankBtnY, rankBtnW, rankBtnH, rankBtnR, "Ver o rank dos cursos");
 
   } else if (state == "loadingTips") {
-    text("Por favor, aguarde. Suas dicas estão sendo geradas.", width / 2, height / 2);
-    if (!loadingStarted) {
-      loadingStarted = true;
-      thread("generateTips");
+    if (tipsGenerated == true) {
+      state = "showingTips";
+      showTips(tips);
+    } else {
+      text("Por favor, aguarde. Suas dicas estão sendo geradas.", width / 2, height / 2);
+
+      if (loadingMovieReady) {
+        float movieRatio = (float)loading.width / loading.height;
+        float displayWidth = 320;
+        float displayHeight = displayWidth / movieRatio;
+
+        imageMode(CENTER);
+        image(loading, width / 2, height / 2 + 120, displayWidth - 200, displayHeight - 200);
+        imageMode(CORNER);
+      }
+
+      if (!loadingStarted) {
+        loadingStarted = true;
+        thread("generateTips");
+      }
     }
   } else if (state == "showingTips") {
-    showTips(tips);
+      showTips(tips);
   }
+
   verifyMouseOver();
 }
 
@@ -354,7 +388,10 @@ void generatePersonalizedTips() {
   promptBuilder.append("Além de chamá-lo pelo primeiro nome, se dirija a ele em primeira pessoa, em um tom pessoal e amigável. ");
   promptBuilder.append("Faça sugestões para que esse estudante torne a sua rotina mais sustentável ");
   promptBuilder.append("com base em informações sobre a localização mencionada e os hábitos do mesmo. ");
-  promptBuilder.append("Dê no máximo 5 sugestões práticas e objetivas.");
+  promptBuilder.append("Dê no máximo 5 sugestões práticas e objetivas. ");
+  promptBuilder.append("Sempre que der a sugestão, explique ao estudante como isso impacta ele mesmo e o mundo ao redor positivamente. ");
+  promptBuilder.append("Antes das introduções práticas, escreva um pequeno parágrafo como se estivesse de fato lendo o que ele respondeu. ");
+  promptBuilder.append("Use somente palavras em português do Brasil.");
   
   tips = askAI(promptBuilder.toString());
 }
@@ -404,8 +441,12 @@ void mousePressed() {
     exit();
   }
 
-  if (state == "showingTips" && mouseOver(width/2 - 150, height - 80, 300, 40)) {
-    state = "showingResults";
+  if (state == "showingTips") {
+    if (mouseOver(width/2 - 150, height - 80, 300, 40)) {
+      state = "showingResults";
+    } else if (mouseOver(pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH)) {
+      exportPDF();
+    }
   }
 }
 
@@ -430,8 +471,13 @@ void verifyMouseOver() {
       mouseOverStroke(nextBtnX, nextBtnY, nextBtnW, nextBtnH, nextBtnR);
     }
   }
-  if (state == "showingTips" && mouseOver(width/2 - 150, height - 80, 300, 40)) {
-    mouseOverStroke(width/2 - 150, height - 80, 300, 40, 28);
+  if (state == "showingTips") {
+    if (mouseOver(width/2 - 150, height - 80, 300, 40)) {
+      mouseOverStroke(width/2 - 150, height - 80, 300, 40, 28);
+    }
+    if (mouseOver(pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH)) {
+      mouseOverStroke(pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH, pdfBtnR);
+    }
   }
 }
 
@@ -567,25 +613,77 @@ void generateTips() {
 
 void showTips(String tips) {
   if (tips != null) {
-    float boxW = width * 0.8;
+    float boxW = width * 0.95;
     float boxX = (width - boxW) / 2;
-    float boxY = 100;
+    float boxY = 80;
     
+    if (exportingPDF) {
+      beginRecord(PDF, "data/" + pdfFilename);
+      background(255);
+    }
+
     fill(245);
-    stroke(150);
-    strokeWeight(1);
+    noStroke();
     rect(boxX - 20, boxY - 20, boxW + 40, height - 200, 10);
     
     fill(0);
     textAlign(CENTER, TOP);
-    textSize(24);
+    textSize(18);
     text("Dicas Personalizadas de Sustentabilidade", width/2, boxY);
+
+    TableRow row = table.getRow(table.getRowCount() - 1);
+    String nome = row.getString("nome");
+    String curso = row.getString("curso");
+    String email = row.getString("email");
     
+    textSize(16);
+    text("Aluno: " + nome + " | Curso: " + curso + " | Email: " + email, width/2, boxY + 35);
+    
+    // linha de separacao
+    stroke(150);
+    line(boxX, boxY + 60, boxX + boxW, boxY + 60);
+    noStroke();
+    
+    // dicas em si
     textAlign(LEFT, TOP);
-    textSize(20);
-    text(tips, boxX, boxY + 50, boxW, height - 280);
+    textSize(14);
+    fill(0);
+    text(tips, boxX, boxY + 70, boxW, height - 250);
     
-    textAlign(CENTER, CENTER);
-    drawButton(width/2 - 150, height - 80, 300, 40, 28, "Voltar aos Resultados");
+    // exporta e volta flag ao normal
+    if (exportingPDF) {
+      endRecord();
+      exportingPDF = false;
+      println("PDF saved to: data/" + pdfFilename);
+    } else {
+      textAlign(CENTER, CENTER);
+      
+      drawButton(pdfBtnX, pdfBtnY, pdfBtnW, pdfBtnH, pdfBtnR, "Exportar para PDF");
+      
+      drawButton(width/2 - 150, height - 80, 300, 40, 28, "Voltar aos Resultados");
+    }
   }
+}
+
+String generatePDFFilename() {
+  TableRow row = table.getRow(table.getRowCount() - 1);
+  String nome = row.getString("nome").replaceAll("\\s+", "_");
+  
+  String timestamp = year() + "" + nf(month(), 2) + "" + nf(day(), 2) + "_" + 
+                    nf(hour(), 2) + "" + nf(minute(), 2) + "" + nf(second(), 2);
+  
+  return "dicas_sustentabilidade_" + nome + "_" + timestamp + ".pdf";
+}
+
+void exportPDF() {
+  pdfFilename = generatePDFFilename();
+  exportingPDF = true;
+  
+  // redraw para gerar o pdf
+  redraw();
+}
+
+void movieEvent(Movie m) {
+  m.read();
+  loadingMovieReady = true;
 }
