@@ -2,3 +2,5 @@
 *.csv
 *.autosave
 .venv
+*.pdf
+.DS_Store
