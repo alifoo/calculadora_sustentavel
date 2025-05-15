@@ -2,11 +2,11 @@
 
 Calculadora sustentável é uma ferramenta interativa que calcula o impacto ambiental de estudantes universitários, através de:
 
-📊 Questionário com 14 perguntas sobre hábitos diários
-🌍 Cálculo automático da pegada de carbono
-💡 Dicas personalizadas por IA para redução de impacto
-📥 Exportação de resultados em PDF/planilha
-🎤 Acessibilidade através de voz via IA
+- Questionário com 14 perguntas sobre hábitos diários
+- Cálculo automático da pegada de carbono
+- Dicas personalizadas por IA para redução de impacto
+- Exportação de resultados em PDF/planilha
+- Acessibilidade através de voz via IA
 
 Tecnologias utilizadas: Processing, Java, IA generativa
 Principais bibliotecas: FastAPI, Pydantic e bibliotecas internas do Processing 4.
