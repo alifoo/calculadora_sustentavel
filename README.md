@@ -20,6 +20,54 @@ Principais bibliotecas: FastAPI, Pydantic e bibliotecas internas do Processing 4
 ## Diagrama inicial de planejamento
 ![Diagrama](diagram.png)
 
+## 🛠 Instalação e Execução
+
+### Pré-requisitos
+
+Processing 4 instalado
+Python 3.8+
+Gerenciador de pacotes pip
+
+### Passo a Passo
+1. Clone o repositório
+
+```
+git clone https://github.com/alifoo/calculadora_sustentavel.git
+cd pegada-ecologica
+```
+
+2. Configure o ambiente virtual Python
+
+```
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+```
+
+3. Instale as dependências
+
+```
+pip install -r requirements.txt
+```
+
+4. Inicie o servidor local
+
+```
+cd local_server
+uvicorn main:app --reload --port 8000
+```
+
+6. Abra o Processing 4
+7. Carregue qualquer arquivo do projeto (por exemplo, main.pde)
+8. Clique no botão "Run" (▶️)
+
+⚠️ Importante
+
+Mantenha o servidor Python rodando enquanto usa a aplicação.
+Para Windows, substitua source venv/bin/activate por venv\Scripts\activate.
+Em caso de erros, verifique se todas as portas estão livres (especialmente 8000).
+
+
 ## TO-DO Roadmap (código):
 
 #### Inputs
