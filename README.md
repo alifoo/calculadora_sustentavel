@@ -24,9 +24,9 @@ Principais bibliotecas: FastAPI, Pydantic e bibliotecas internas do Processing 4
 
 ### Pré-requisitos
 
-Processing 4 instalado
-Python 3.8+
-Gerenciador de pacotes pip
+- Processing 4 instalado
+- Python 3.8+
+- Gerenciador de pacotes pip
 
 ### Passo a Passo
 1. Clone o repositório
