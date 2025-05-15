@@ -27,6 +27,7 @@ Principais bibliotecas: FastAPI, Pydantic e bibliotecas internas do Processing 4
 - Processing 4 instalado
 - Python 3.8+
 - Gerenciador de pacotes pip
+- Créditos + Key OpenAI API
 
 ### Passo a Passo
 1. Clone o repositório
@@ -48,6 +49,11 @@ venv\Scripts\activate     # Windows
 
 ```
 pip install -r requirements.txt
+```
+
+4. Crie um arquivo .env e insira sua API key da OpenAI
+```
+OPENAI_API_KEY=sua-chave
 ```
 
 4. Inicie o servidor local
