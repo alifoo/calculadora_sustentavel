@@ -56,7 +56,7 @@ pip install -r requirements.txt
 OPENAI_API_KEY=sua-chave
 ```
 
-4. Inicie o servidor local
+5. Inicie o servidor local
 
 ```
 cd local_server
